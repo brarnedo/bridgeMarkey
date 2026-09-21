@@ -31,13 +31,13 @@ export default function Login() {
     <>
       <div className="topbar">
         <div className="container topbar-inner">
-          <div className="brand"><span className="brand-mark"></span>Markey Connect</div>
+          <div className="brand"><span className="brand-mark"></span>Markey Bridge</div>
         </div>
       </div>
       <div className="login-screen">
         <form className="login-card" onSubmit={onSubmit}>
           <div className="login-mark"></div>
-          <h1>{modo === 'login' ? 'Ingresá a Markey Connect' : 'Creá tu cuenta de sandbox'}</h1>
+          <h1>{modo === 'login' ? 'Ingresá a Markey Bridge' : 'Creá tu cuenta de sandbox'}</h1>
           <p className="sub">
             Probá la disponibilidad, reserva y gestión de turnos con datos de un entorno de pruebas, antes de integrarlo en tu desarrollo.
           </p>

@@ -12,7 +12,7 @@ export default function Topbar() {
   return (
     <div className="topbar">
       <div className="container topbar-inner">
-        <div className="brand"><span className="brand-mark"></span>Markey Connect</div>
+        <div className="brand"><span className="brand-mark"></span>Markey Bridge</div>
         <div className="topbar-right">
           <span className="env-badge">Entorno: Sandbox</span>
           <div className="user-chip"><div className="avatar">CS</div>Tu empresa</div>
