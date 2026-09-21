@@ -1,0 +1,89 @@
+{
+  "categorias": [
+    { "key": "turnos", "label": "Turnos", "status": "live" },
+    { "key": "pacientes", "label": "Pacientes", "status": "soon", "countPlanificado": 9 },
+    { "key": "coberturas", "label": "Coberturas", "status": "soon", "countPlanificado": 7 },
+    { "key": "profesionales", "label": "Profesionales", "status": "soon", "countPlanificado": 6 }
+  ],
+  "apis": [
+    {
+      "id": "disponibilidad",
+      "categoria": "turnos",
+      "metodo": "GET",
+      "endpoint": "appObtenerDisponibilidad",
+      "titulo": "Ver horarios disponibles",
+      "descripcion": "Devuelve los turnos libres para un procedimiento, en un rango de fechas, con o sin médico puntual.",
+      "descripcionLarga": "Trae los horarios abiertos para un procedimiento dentro de un rango de fechas. Si no se envía mediCodigo, devuelve turnos de todos los médicos que realizan ese procedimiento.",
+      "parametros": [
+        { "nombre": "procCodigo", "tipo": "int", "requerido": true, "descripcion": "Código del procedimiento a buscar." },
+        { "nombre": "mediCodigo", "tipo": "int", "requerido": false, "descripcion": "Código del médico. Si se omite, trae todos los médicos disponibles." },
+        { "nombre": "desde", "tipo": "date", "requerido": true, "descripcion": "Fecha inicial del rango (YYYY-MM-DD)." },
+        { "nombre": "hasta", "tipo": "date", "requerido": true, "descripcion": "Fecha final del rango (YYYY-MM-DD)." }
+      ],
+      "ejemploRequest": { "procCodigo": 10232, "mediCodigo": null, "desde": "2026-09-08", "hasta": "2026-09-12" },
+      "ejemploResponse": { "success": true, "data": [{ "horaCodigo": 10635, "mediCodigo": 20377, "fecha": "2026-09-09T10:00" }] },
+      "errores": [
+        { "code": "PARAM_INVALIDO", "http": 400, "message": "Falta procCodigo o el rango de fechas es inválido." },
+        { "code": "AUTH_INVALIDA", "http": 401, "message": "La apiKey o el token no son válidos." }
+      ]
+    },
+    {
+      "id": "reservar",
+      "categoria": "turnos",
+      "metodo": "POST",
+      "endpoint": "appReservarTurno",
+      "titulo": "Reservar un turno",
+      "descripcion": "Confirma un turno puntual para un paciente ya identificado, sobre un horario disponible.",
+      "descripcionLarga": "Toma un horario devuelto por appObtenerDisponibilidad y lo confirma para un paciente. El paciente debe existir previamente en Markey.",
+      "parametros": [
+        { "nombre": "paciCodigo", "tipo": "int", "requerido": true, "descripcion": "Código del paciente que reserva el turno." },
+        { "nombre": "horaCodigo", "tipo": "int", "requerido": true, "descripcion": "Código del horario elegido." },
+        { "nombre": "procCodigo", "tipo": "int", "requerido": true, "descripcion": "Código del procedimiento a reservar." }
+      ],
+      "ejemploRequest": { "paciCodigo": 4, "horaCodigo": 10635, "procCodigo": 10232 },
+      "ejemploResponse": { "success": true, "data": { "turnCodigo": 158904947, "estado": "confirmado" } },
+      "errores": [
+        { "code": "TURNO_NO_DISPONIBLE", "http": 409, "message": "El horario ya fue tomado por otro paciente." },
+        { "code": "PARAM_INVALIDO", "http": 400, "message": "Falta paciCodigo, horaCodigo o procCodigo." }
+      ]
+    },
+    {
+      "id": "cancelar",
+      "categoria": "turnos",
+      "metodo": "POST",
+      "endpoint": "appCancelarTurno",
+      "titulo": "Cancelar un turno",
+      "descripcion": "Libera un turno ya reservado y deja registro del motivo de cancelación.",
+      "descripcionLarga": "Cancela un turno confirmado. El horario vuelve a quedar disponible para otros pacientes.",
+      "parametros": [
+        { "nombre": "turnCodigo", "tipo": "int", "requerido": true, "descripcion": "Código del turno a cancelar." },
+        { "nombre": "motivo", "tipo": "string", "requerido": false, "descripcion": "Motivo de la cancelación, para registro interno." }
+      ],
+      "ejemploRequest": { "turnCodigo": 158904947, "motivo": "paciente" },
+      "ejemploResponse": { "success": true, "data": { "turnCodigo": 158904947, "estado": "cancelado" } },
+      "errores": [
+        { "code": "TURNO_NO_ENCONTRADO", "http": 404, "message": "No existe un turno con ese código." },
+        { "code": "TURNO_YA_CANCELADO", "http": 409, "message": "El turno ya estaba cancelado." }
+      ]
+    },
+    {
+      "id": "reprogramar",
+      "categoria": "turnos",
+      "metodo": "POST",
+      "endpoint": "appReprogramarTurno",
+      "titulo": "Reprogramar un turno",
+      "descripcion": "Cancela el turno actual y confirma uno nuevo para el mismo procedimiento, en una sola operación.",
+      "descripcionLarga": "Combina cancelación y reserva en una sola transacción: cancela el turno original y confirma el nuevo horario elegido.",
+      "parametros": [
+        { "nombre": "turnCodigoViejo", "tipo": "int", "requerido": true, "descripcion": "Código del turno que se va a reprogramar." },
+        { "nombre": "horaCodigo", "tipo": "int", "requerido": true, "descripcion": "Código del nuevo horario elegido." }
+      ],
+      "ejemploRequest": { "turnCodigoViejo": 158904947, "horaCodigo": 10812 },
+      "ejemploResponse": { "success": true, "data": { "turnCodigoNuevo": 158905310, "estado": "confirmado" } },
+      "errores": [
+        { "code": "TURNO_NO_DISPONIBLE", "http": 409, "message": "El nuevo horario ya fue tomado." },
+        { "code": "PARAM_INVALIDO", "http": 400, "message": "Falta turnCodigoViejo o horaCodigo." }
+      ]
+    }
+  ]
+}
